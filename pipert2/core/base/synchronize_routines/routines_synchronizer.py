@@ -29,7 +29,7 @@ class RoutinesSynchronizer(EventExecutorInterface):
         self.notify_callback = notify_callback
         self.updating_interval = updating_interval
 
-        self._stop_event = mp.Event()
+        self.stop_event = mp.Event()
 
         synchronizer_events_to_listen = set(self.get_events().keys())
         self.event_handler = event_board.get_event_handler(synchronizer_events_to_listen)
@@ -41,11 +41,11 @@ class RoutinesSynchronizer(EventExecutorInterface):
         self.routines_graph: Dict[str, SynchronizerNode] = mp_manager.dict()
 
         # self.update_delay_process: mp.Process = None
-        self.notify_delay_thread: threading.Thread = threading.Thread(target=self.update_delay_iteration)
+        self.notify_delay_thread = threading.Thread(target=self.update_delay_iteration)
 
         self.routines_measurements: Dict[str, list] = self.mp_manager.dict()
 
-        self.event_process: mp.Process = None
+        self.event_procss: mp.Process = None
 
     def execute_event(self, event: Method) -> None:
         """Execute the event that notified.
@@ -62,9 +62,10 @@ class RoutinesSynchronizer(EventExecutorInterface):
         """
 
         self.routines_graph = self.create_routines_graph()
-        mp.Process(target=self.base_listen_to_events).start()
+        self.event_procss = mp.Process(target=self.base_listen_to_events).start()
 
-        self._stop_event.clear()
+        self.stop_event.clear()
+
         self.notify_delay_thread.start()
 
     def create_routines_graph(self) -> 'DictProxy':
@@ -139,7 +140,7 @@ class RoutinesSynchronizer(EventExecutorInterface):
 
         """
 
-        while not self._stop_event.is_set():
+        while not self.stop_event.set():
             self._execute_function_for_sources(SynchronizerNode.update_original_fps_by_real_time.__name__, self.get_routine_fps)
             self._execute_function_for_sources(SynchronizerNode.update_fps_by_nodes.__name__)
             self._execute_function_for_sources(SynchronizerNode.update_fps_by_fathers.__name__)
@@ -154,7 +155,7 @@ class RoutinesSynchronizer(EventExecutorInterface):
 
         """
 
-        self._stop_event.clear()
+        self.stop_event.clear()
 
     @events(KILL_EVENT_NAME)
     def kill_synchronized_process(self):
@@ -162,8 +163,8 @@ class RoutinesSynchronizer(EventExecutorInterface):
 
         """
 
-        if not self._stop_event.is_set():
-            self._stop_event.set()
+        if not self.stop_event.is_set():
+            self.stop_event.set()
 
     @events(FINISH_ROUTINE_LOGIC_NAME)
     def update_finish_routine_logic_time(self, **params):

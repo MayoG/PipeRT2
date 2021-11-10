@@ -68,6 +68,9 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
         self.cosnt_fps = mp.Value('f', 0.0)
         self.cosnt_fps.value = -1
 
+        self.sleeping_counter = mp.Value('i', 0)
+        self.empty_queue_counter = mp.Value('i', 0)
+
     def initialize(self, message_handler: MessageHandler, event_notifier: Callable, *args, **kwargs):
         """Initialize the routine to be ready to run
 
@@ -124,7 +127,6 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
         """
 
         if self.name == "register_frames":
-            self._logger.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
             self.message_handler.logger = self._logger
             self.message_handler.input_queue.logger = self._logger
 
@@ -164,6 +166,7 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
                 required_fps = self.cosnt_fps.value if self.cosnt_fps.value > -1 else self._fps.value
 
                 if required_fps > 0 and duration < 1 / required_fps:
+                    self.sleeping_counter.value += 1
                     time.sleep((1 / required_fps) - duration)
 
         self._base_cleanup()

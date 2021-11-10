@@ -7,7 +7,9 @@ from pipert2.utils.consts import FINISH_ROUTINE_LOGIC_NAME, START_ROUTINE_LOGIC_
 class src(SourceRoutine):
     def main_logic(self) -> dict:
         a = 5
-        return None
+        return {
+            'a': 5
+        }
 
 
 class dst(DestinationRoutine):
@@ -44,7 +46,7 @@ pipe.build()
 # pipe.notify_event(START_ROUTINE_LOGIC_NAME)
 pipe.notify_event(START_EVENT_NAME)
 
-time.sleep(2)
+time.sleep(10)
 
 pipe.notify_event(KILL_EVENT_NAME)
 pipe.join()

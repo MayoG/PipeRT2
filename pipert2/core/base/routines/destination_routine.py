@@ -26,3 +26,5 @@ class DestinationRoutine(Routine, metaclass=ABCMeta):
                 self._logger.exception(f"The routine has crashed: {error}")
             finally:
                 return duration
+        else:
+            self.empty_queue_counter.value += 1

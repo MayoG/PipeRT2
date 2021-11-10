@@ -34,3 +34,5 @@ class MiddleRoutine(Routine, metaclass=ABCMeta):
                     self.message_handler.put(message)
             finally:
                 return duration
+        else:
+            self.empty_queue_counter.value += 1
