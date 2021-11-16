@@ -91,7 +91,7 @@ class FPSLogicRunner(RoutineLogicRunner):
         if self._const_fps is not NULL_FPS:
             duration = 1 / self._const_fps
 
-        self.notifier.data.append(duration)
+        self.notifier.add(duration)
         self.last_main_logic_duration = duration
 
         return result

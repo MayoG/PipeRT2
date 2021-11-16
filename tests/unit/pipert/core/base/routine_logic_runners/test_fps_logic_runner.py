@@ -46,10 +46,9 @@ def test_run_main_logic(mocker: MockerFixture, fps_logic_runner_with_dummy_notif
     main_logic_mock.return_value = "test"
 
     notifier_mock = fps_logic_runner_with_dummy_notifier.notifier
-    notifier_mock.data = mocker.MagicMock()
 
     run_main_logic_result = fps_logic_runner_with_dummy_notifier.run_main_logic(main_logic_mock)
 
-    notifier_mock.data.append.assert_called_with(1)
+    notifier_mock.add.assert_called_with(1)
     assert fps_logic_runner_with_dummy_notifier.last_main_logic_duration == 1
     assert run_main_logic_result == "test"
