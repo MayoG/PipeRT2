@@ -13,7 +13,7 @@ class FPSLogicRunner(RoutineLogicRunner):
 
     events = class_functions_dictionary()
 
-    def __init__(self, name: str, logger):
+    def __init__(self, name: str, logger, const_fps=NULL_FPS):
 
         self.name = name
         self._logger = logger
@@ -22,7 +22,7 @@ class FPSLogicRunner(RoutineLogicRunner):
 
         self.last_main_logic_duration = None
         self._fps = NULL_FPS
-        self._const_fps = NULL_FPS
+        self._const_fps = const_fps
 
     def execute_event(self, event: Method) -> None:
         EventExecutorInterface.execute_event(self, event)

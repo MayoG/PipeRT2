@@ -7,8 +7,8 @@ from pipert2.utils.consts import NULL_FPS
 
 
 class SourceCounterRoutine(SourceRoutine):
-    def __init__(self, fps, name):
-        super().__init__(name)
+    def __init__(self, fps, name, const_fps=NULL_FPS):
+        super().__init__(name, const_fps=const_fps)
         self.routine_fps = fps
         self.counter = mp.Value('i', 0)
 

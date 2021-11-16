@@ -28,10 +28,11 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
     runners = class_functions_dictionary()
     routines_created_counter = 0
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: str = None, **runner_kwargs):
         """
         Args:
             name: Name of the routine.
+            runner_kwargs: kwargs for logic runner.
 
         Attributes:
             name (str): Name of the flow
@@ -41,6 +42,7 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
             event_notifier (Callback): Callback for notifying an event has occurred.
             _logger (Logger): The routines logger object.
             stop_event (mp.Event): A multiprocessing event object indicating the routine state (run/stop).
+            runner_kwargs: kwargs for logic runner.
 
         """
 
@@ -49,6 +51,8 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
         else:
             self.name = f"{self.__class__.__name__}-{self.routines_created_counter}"
             self.routines_created_counter += 1
+
+        self.runner_kwargs = runner_kwargs
 
         self.flow_name = None
         self.message_handler: MessageHandler = None
@@ -81,7 +85,7 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
             self.set_runner_as_thread()
 
         if auto_pacing_mechanism:
-            self.routine_logic_runner = FPSLogicRunner(self.name, self._logger)
+            self.routine_logic_runner = FPSLogicRunner(self.name, self._logger, **self.runner_kwargs)
         else:
             self.routine_logic_runner = BaseRoutineLogicRunner()
 

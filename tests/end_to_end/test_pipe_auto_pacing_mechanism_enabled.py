@@ -41,8 +41,7 @@ def test_number_of_executions_of_main_logic_slow_routine_in_the_last_one(mocker:
 @patch("pipert2.core.base.routine_logic_runners.fps_logic_runner.ROUTINE_NOTIFY_DURATIONS_INTERVAL", 0.25)
 @patch("pipert2.core.base.synchronise_routines.routines_synchroniser.SYNCHRONISER_UPDATE_INTERVAL", 0.25)
 def test_number_of_executions_of_main_logic_slow_routine_in_the_last_one_consts_fps():
-    source_counter_routine = SourceCounterRoutine(40, "src")
-    source_counter_routine._const_fps = 20
+    source_counter_routine = SourceCounterRoutine(40, "src", const_fps=20)
 
     destination_counter_routine = DestinationCounterRoutine(12, "dst")
 
