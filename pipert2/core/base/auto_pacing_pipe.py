@@ -1,6 +1,5 @@
-from pipert2.core import Routine
-
 from pipert2 import Pipe
+from pipert2.core import Routine
 from pipert2.core.base.synchronise_routines.routines_synchroniser import RoutinesSynchroniser
 
 
@@ -13,11 +12,19 @@ class AutoPacingPipe(Pipe):
                                                          notify_callback=self.event_board.get_event_notifier())
 
     def build(self):
+        """Build the pipe to be ready to start working, and build the routine synchroniser.
+
+        """
+
         super(AutoPacingPipe, self).build()
         self.routine_synchroniser.wires = self.wires
         self.routine_synchroniser.build()
 
     def join(self, to_kill=False):
+        """Block the execution until all of the processes of base pipe have been killed and the synchroniser.
+
+        """
+
         super(AutoPacingPipe, self).join()
         self.routine_synchroniser.join()
         self.logger.plog("Joined synchroniser")
