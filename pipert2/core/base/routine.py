@@ -9,8 +9,11 @@ from pipert2.utils.method_data import Method
 from pipert2.utils.dummy_object import Dummy
 from pipert2.core.handlers.message_handler import MessageHandler
 from pipert2.utils.annotations import class_functions_dictionary
+from pipert2.core.base.routine_logic_runner import RoutineLogicRunner
 from pipert2.utils.consts.event_names import START_EVENT_NAME, STOP_EVENT_NAME
+from pipert2.core.base.routine_logic_runners.fps_logic_runner import FPSLogicRunner
 from pipert2.utils.interfaces.event_executor_interface import EventExecutorInterface
+from pipert2.core.base.routine_logic_runners.base_routine_logic_runner import BaseRoutineLogicRunner
 
 
 class Routine(EventExecutorInterface, metaclass=ABCMeta):
@@ -56,7 +59,9 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
         self.stop_event.set()
         self.runner = Dummy()
 
-    def initialize(self, message_handler: MessageHandler, event_notifier: Callable, *args, **kwargs):
+        self.routine_logic_runner: RoutineLogicRunner = Dummy()
+
+    def initialize(self, message_handler: MessageHandler, event_notifier: Callable, auto_pacing_mechanism: bool = False, *args, **kwargs):
         """Initialize the routine to be ready to run
 
         Args:
@@ -75,16 +80,45 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
         else:
             self.set_runner_as_thread()
 
+        if auto_pacing_mechanism:
+            self.routine_logic_runner = FPSLogicRunner(self.name, self._logger)
+        else:
+            self.routine_logic_runner = BaseRoutineLogicRunner()
+
+        self.routine_logic_runner.initialize(event_notifier)
+
     def set_logger(self, logger: Logger):
+        """Set logger.
+
+        Args:
+            logger: The logger.
+
+        """
+
         self._logger = logger
+
+    def get_event_names_to_listen(self):
+        """Get the name of the events that under the routine hierarchy to listen.
+
+        Returns:
+            Set of event names of all routine hierarchy.
+        """
+
+        routine_event_names = Routine.get_events().keys()
+        logic_runner_events = self.routine_logic_runner.get_events()
+
+        if logic_runner_events is None:
+            logic_runner_event_names = []
+        else:
+            logic_runner_event_names = logic_runner_events.keys()
+
+        return set(list(routine_event_names) + list(logic_runner_event_names))
 
     @classmethod
     def get_events(cls):
         """Get the events of the routine
-
         Returns:
             dict[str, list[Callback]]: The events callbacks mapped by their events
-
         """
 
         routine_events = cls.events.all[Routine.__name__]
@@ -136,13 +170,9 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
         self.setup()
 
         while not self.stop_event.is_set():
-            self._run()
+            self.routine_logic_runner.run(self._extended_run)
 
         self._base_cleanup()
-
-    @abstractmethod
-    def _run(self):
-        pass
 
     @runners("thread")
     def set_runner_as_thread(self):
@@ -183,6 +213,7 @@ class Routine(EventExecutorInterface, metaclass=ABCMeta):
 
         """
 
+        self.routine_logic_runner.execute_event(event)
         EventExecutorInterface.execute_event(self, event)
 
     def notify_event(self, event_name: str, routines_by_flow: dict = defaultdict(list), **event_parameters) -> None:

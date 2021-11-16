@@ -14,10 +14,10 @@ class DestinationCounterRoutine(DestinationRoutine):
         self.estimate_fps = mp.Value('f', NULL_FPS)
 
     def main_logic(self, data) -> None:
-        fps = self._const_fps if not self._const_fps == NULL_FPS else self._fps
+        fps = self.routine_logic_runner._const_fps if not self.routine_logic_runner._const_fps == NULL_FPS else self.routine_logic_runner._fps
 
         if fps is not None:
-            self.estimate_fps.value = self._fps
+            self.estimate_fps.value = self.routine_logic_runner._fps
 
         self.counter.value = self.counter.value + 1
         time.sleep(1 / self.routine_fps)

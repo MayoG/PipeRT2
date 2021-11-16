@@ -14,8 +14,8 @@ class MiddleCounterRoutine(MiddleRoutine):
         self.estimate_fps = mp.Value('f', NULL_FPS)
 
     def main_logic(self, data) -> dict:
-        if self._fps is not None:
-            self.estimate_fps.value = self._fps
+        if self.routine_logic_runner._fps is not None:
+            self.estimate_fps.value = self.routine_logic_runner._fps
 
         self.counter.value = self.counter.value + 1
         time.sleep(1 / self.routine_fps)

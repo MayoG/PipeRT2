@@ -17,7 +17,7 @@ pipe.build()
 
 pipe.notify_event(START_EVENT_NAME)
 
-time.sleep(2)
+time.sleep(5)
 
 pipe.notify_event(KILL_EVENT_NAME)
 pipe.join()

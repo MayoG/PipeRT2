@@ -76,22 +76,3 @@ def test_routine_execution_catch_exception(mocker, dummy_routine):
     message_handler = dummy_routine.message_handler
 
     assert message_handler.put.call_count == 0
-
-
-def test_run_main_logic_with_time_measurement_full_duration_queue(mocker: MockerFixture, dummy_routine: MiddleRoutine):
-
-    dummy_routine.durations = deque(maxlen=1)
-    dummy_routine.durations.append(1)
-
-    callback = mocker.MagicMock()
-
-    dummy_routine._run_main_logic_with_durations_updating(callback)
-
-
-def test_update_delay_time(dummy_routine: MiddleRoutine):
-
-    dummy_routine.fps_multiplier = 2
-
-    dummy_routine.update_delay_time(**{"fps": 10})
-
-    assert dummy_routine._fps == 20

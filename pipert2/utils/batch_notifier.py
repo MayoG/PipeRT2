@@ -5,10 +5,10 @@ from typing import Callable, Deque
 
 
 class BatchNotifier:
-    def __init__(self, interval: float, event_name: str, callable: Callable, source: str, data_maxlen: int):
+    def __init__(self, interval: float, event_name: str, notify: Callable, source: str, data_maxlen: int):
         self.interval = interval
         self.event_name = event_name
-        self.callable = callable
+        self.notify = notify
         self.source = source
 
         self.stop_notify = threading.Event()
@@ -23,5 +23,5 @@ class BatchNotifier:
 
     def _run(self):
         while not self.stop_notify.is_set():
-            self.callable(event_name=self.event_name, source_name=self.source, data=self.data)
+            self.notify(event_name=self.event_name, source_name=self.source, data=self.data)
             time.sleep(self.interval)

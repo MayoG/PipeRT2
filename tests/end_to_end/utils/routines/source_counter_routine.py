@@ -1,6 +1,8 @@
 import time
 import multiprocessing as mp
-from pipert2 import SourceRoutine
+from typing import Callable
+
+from pipert2 import SourceRoutine, MessageHandler
 from pipert2.utils.consts import NULL_FPS
 
 
@@ -13,9 +15,11 @@ class SourceCounterRoutine(SourceRoutine):
         self.prev_run_time = None
         self.estimate_fps = mp.Value('f', NULL_FPS)
 
+        self._const_fps = 0
+
     def main_logic(self) -> dict:
 
-        fps = self._const_fps if not self._const_fps == NULL_FPS else self._fps
+        fps = self.routine_logic_runner._const_fps if not self.routine_logic_runner._const_fps == NULL_FPS else self.routine_logic_runner._fps
 
         if fps is not None:
             self.estimate_fps.value = fps
@@ -26,3 +30,9 @@ class SourceCounterRoutine(SourceRoutine):
         return {
             'test': 'test'
         }
+
+    def initialize(self, message_handler: MessageHandler, event_notifier: Callable, auto_pacing_mechanism: bool = False, *args, **kwargs):
+        super().initialize(message_handler, event_notifier, auto_pacing_mechanism)
+
+        if self._const_fps > 0:
+            self.routine_logic_runner.set_const_fps(self._const_fps)

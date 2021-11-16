@@ -40,7 +40,7 @@ class Flow(BaseEventExecutor):
         for routine in routines:
             routine.set_logger(logger=logger.getChild(routine.name))
             routine.flow_name = self.name
-            flow_events_to_listen.update(routine.get_events().keys())
+            flow_events_to_listen.update(routine.get_event_names_to_listen())
             self.routines[routine.name] = routine
 
         self.events_to_listen.update(flow_events_to_listen)

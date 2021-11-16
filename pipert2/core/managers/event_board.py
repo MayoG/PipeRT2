@@ -18,8 +18,6 @@ class EventBoard:
     def __init__(self):
         self.events_pipes = defaultdict(list)
         self.new_events_queue = SimpleQueue()
-        self.kill_event_called = Event()
-        self.kill_event_called.clear()
 
     def get_event_handler(self, events_to_listen: Set[str]):
         """Return an event handler adjusted to the given events.
@@ -70,12 +68,9 @@ class EventBoard:
         """
 
         def notify_event(output_event_queue, event_name, specific_flow_routines: dict = defaultdict(list), **params):
-            if not self.kill_event_called.is_set():
-                output_event_queue.put(Method(event_name,
-                                              specific_flow_routines=specific_flow_routines,
-                                              params=params))
-            if event_name == KILL_EVENT_NAME:
-                self.kill_event_called.set()
+            output_event_queue.put(Method(event_name,
+                                          specific_flow_routines=specific_flow_routines,
+                                          params=params))
 
         return partial(notify_event, self.new_events_queue)
 
@@ -83,9 +78,6 @@ class EventBoard:
         self.new_events_queue.put(Method(event_name=event_name,
                                          specific_flow_routines=specific_flow_routines,
                                          params=params))
-
-        if event_name == KILL_EVENT_NAME:
-            self.kill_event_called.set()
 
     def join(self):
         self.event_board_thread.join()
